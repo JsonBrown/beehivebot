@@ -929,7 +929,6 @@ namespace ModBot
         }
 
 
-
         private void addUserToList(String nick)
         {
             lock (users)
