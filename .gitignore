@@ -4,3 +4,4 @@
 bin
 /ModBot/Externals
 /*.dat
+/packages/*
