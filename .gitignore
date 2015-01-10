@@ -5,3 +5,4 @@ bin
 /ModBot/Externals
 /*.dat
 /packages/*
+*/obj
