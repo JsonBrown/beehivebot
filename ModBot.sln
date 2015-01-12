@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "beehive.common", "beehive.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "beehive.service", "beehive.service\beehive.service.csproj", "{7B85ADCF-A717-4CC8-8AD7-1F1044685E4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "beehive.console", "beehive.console\beehive.console.csproj", "{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,16 @@ Global
 		{7B85ADCF-A717-4CC8-8AD7-1F1044685E4E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{7B85ADCF-A717-4CC8-8AD7-1F1044685E4E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7B85ADCF-A717-4CC8-8AD7-1F1044685E4E}.Release|x86.ActiveCfg = Release|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7A8AEF6A-C6C7-4DDA-918C-2F6BC52ECAA4}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

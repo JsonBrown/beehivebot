@@ -13,20 +13,15 @@ using log4net;
 
 namespace beehive.core
 {
-    class Irc
+    public class Irc
     {
         private ILog log = LogManager.GetLogger(typeof(Irc));
-        private String nick, password, channel, currency, admin, user = "";
-        private int interval, payout = 0;
+        private String nick, password, channel,  admin, user = "";
         private int[] intervals = { 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60 };
         private TcpClient irc;
         private StreamReader read;
         private StreamWriter write;
         private List<string> users = new List<string>();
-        private DateTime time;
-        private bool handoutGiven = false;
-        private String[] betOptions;
-        private Timer currencyQueue;
         private List<string> usersToLookup = new List<string>();
         private ConcurrentQueue<string> highPriority = new ConcurrentQueue<string>();
         private ConcurrentQueue<string> normalPriority = new ConcurrentQueue<string>();
@@ -34,22 +29,16 @@ namespace beehive.core
         private Thread listener;
         private Thread timerThread;
         private Thread KAthread;
-        private Timer auctionLooper;
         private Timer messageQueue;
-        private String greeting;
-        private bool greetingOn = false;
         private int attempt;
 
 
-        public Irc(String nick, String password, String channel, String currency, int interval, int payout)
+        public Irc(String nick, String password, String channel)
         {
             setNick(nick);
             setPassword(password);
             setChannel(channel);
             setAdmin(channel);
-            setCurrency(currency);
-            setInterval(interval);
-            setPayout(payout);
 
             Initialize();
         }
@@ -146,11 +135,7 @@ namespace beehive.core
 
         private void parseMessage(String message)
         {
-            //print(message);            
-            String[] msg = message.Split(' ');
-
-
-            
+            log.Debug(message);            
         }
 
         private void addUserToList(String nick)
@@ -224,28 +209,6 @@ namespace beehive.core
             {
                 admin = tChannel;
             }
-        }
-
-        private void setCurrency(String tCurrency)
-        {
-            if (tCurrency.StartsWith("!"))
-            {
-                currency = tCurrency.Substring(1);
-            }
-            else
-            {
-                currency = tCurrency;
-            }
-        }
-
-        private void setInterval(int tInterval)
-        {
-            interval = tInterval;
-        }
-
-        private void setPayout(int tPayout)
-        {
-            payout = tPayout;
         }
 
         private void print(String message)
@@ -345,10 +308,6 @@ namespace beehive.core
 
         private void addToLookups(String nick)
         {
-            if (usersToLookup.Count == 0)
-            {
-                currencyQueue.Change(4000, Timeout.Infinite);
-            }
             if (!usersToLookup.Contains(nick))
             {
                 usersToLookup.Add(nick);
