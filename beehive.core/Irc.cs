@@ -13,7 +13,7 @@ using log4net;
 
 namespace beehive.core
 {
-    public class Irc
+    public class Irc : IDisposable
     {
         private ILog log = LogManager.GetLogger(typeof(Irc));
         private String nick, password, channel,  admin, user = "";
@@ -71,10 +71,10 @@ namespace beehive.core
 
                     write.AutoFlush = true;
 
-                    sendRaw("PASS " + password);
-                    sendRaw("NICK " + nick);
-                    sendRaw("USER " + nick + " 8 * :" + nick);
-                    sendRaw("JOIN " + channel);
+                    sendRaw(String.Format("PASS {0} \r\n", password));
+                    sendRaw(String.Format("NICK {0} \r\n", nick));
+                    sendRaw(String.Format("USER {0} 8 * : {0}\r\n", nick));
+                    sendRaw(String.Format("JOIN {0}\r\n", channel));
                 }
                 catch (SocketException e)
                 {
@@ -135,7 +135,8 @@ namespace beehive.core
 
         private void parseMessage(String message)
         {
-            log.Debug(message);            
+            log.Debug(message);
+            print(message);
         }
 
         private void addUserToList(String nick)
@@ -337,6 +338,13 @@ namespace beehive.core
                 messageQueue.Change(4000, Timeout.Infinite);
             }
             else messageQueue.Change(4000, Timeout.Infinite);
+        }
+
+        public void Dispose()
+        {
+            if (listener != null) listener.Abort();
+            if (timerThread != null) timerThread.Abort();
+            if (KAthread != null) KAthread.Abort();
         }
     }
 }

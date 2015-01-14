@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace beehive.console
 {
@@ -11,7 +12,11 @@ namespace beehive.console
     {
         static void Main(string[] args)
         {
-            var irc = new Irc("beehivebot", "asdf27yo", "json_brown");
+
+            using (var irc = new Irc(ConfigurationManager.AppSettings["botName"], String.Format("oauth:{0}", ConfigurationManager.AppSettings["botToken"]), ConfigurationManager.AppSettings["channel"]))
+            {
+                Console.ReadLine();
+            }
         }
     }
 }

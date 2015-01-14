@@ -187,53 +187,56 @@ namespace ModBot
 
         private void parseMessage(String message)
         {
-            //print(message);            
-            String[] msg = message.Split(' ');
-            
-            
-            if (msg[0].Equals("PING"))
+            print(message);
+            if (!string.IsNullOrEmpty(message))
             {
-                sendRaw("PONG " + msg[1]);
-                //print("PONG " + msg[1]);
-            }
-            else if (msg[1].Equals("PRIVMSG"))
-            {
-                user = capName(getUser(message));
-                addUserToList(user);
-                //print(message);
-                String temp = message.Substring(message.IndexOf(":", 1)+1);
-                print(user + ": " + temp);
-                handleMessage(temp);
-            }
-            else if (msg[1].Equals("JOIN"))
-            {
-                user = capName(getUser(message));
-                addUserToList(user);
-                print(user + " joined");
-                if (greeting != "" && greetingOn)
+                String[] msg = message.Split(' ');
+
+
+                if (msg[0].Equals("PING"))
                 {
-                    sendMessage(greeting.Replace("@user", user), 3);
+                    sendRaw("PONG " + msg[1]);
+                    //print("PONG " + msg[1]);
                 }
-                if (!db.userExists(user))
+                else if (msg[1].Equals("PRIVMSG"))
                 {
-                    db.newUser(user);
-                    db.addCurrency(user, payout);
+                    user = capName(getUser(message));
+                    addUserToList(user);
+                    //print(message);
+                    String temp = message.Substring(message.IndexOf(":", 1) + 1);
+                    print(user + ": " + temp);
+                    handleMessage(temp);
                 }
-            }
-            else if (msg[1].Equals("PART"))
-            {
-                removeUserFromList(capName(getUser(message)));
-                print(user + " left");
-            }
-            else if (msg[1].Equals("352"))
-            {
-                //print(message);
-                addUserToList(capName(msg[4]));
-            }
-            else
-            {
-                //print(message);
-            }
+                else if (msg[1].Equals("JOIN"))
+                {
+                    user = capName(getUser(message));
+                    addUserToList(user);
+                    print(user + " joined");
+                    if (greeting != "" && greetingOn)
+                    {
+                        sendMessage(greeting.Replace("@user", user), 3);
+                    }
+                    if (!db.userExists(user))
+                    {
+                        db.newUser(user);
+                        db.addCurrency(user, payout);
+                    }
+                }
+                else if (msg[1].Equals("PART"))
+                {
+                    removeUserFromList(capName(getUser(message)));
+                    print(user + " left");
+                }
+                else if (msg[1].Equals("352"))
+                {
+                    //print(message);
+                    addUserToList(capName(msg[4]));
+                }
+                else
+                {
+                    //print(message);
+                }
+            }            
         }
 
         private void handleMessage(String message)
