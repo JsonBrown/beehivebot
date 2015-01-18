@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace beehive.common.Contracts
 {
-    public interface IResultProcessor
+    public interface IResultProcessor : IDisposable
     {
         void Process(CommandResult result);
     }

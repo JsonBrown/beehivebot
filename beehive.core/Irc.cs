@@ -17,6 +17,7 @@ using beehive.core.Commands;
 using beehive.common.Extensions;
 using beehive.core.Processors;
 using beehive.common.Objects;
+using beehive.extensions;
 
 
 namespace beehive.core
@@ -41,10 +42,10 @@ namespace beehive.core
         private Timer messageQueue;
         private int attempt;
 
-
-        public Irc(string nick, string password, string channel)
+        private readonly IDisk disk;
+        public Irc(string nick, string password, string channel, IDisk disk)
         {
-
+            this.disk = disk;
             this.nick = nick.ToLower();
             this.password = password;
             this.channel = channel.StartsWith("#") ? channel : String.Format("#{0}", channel);
@@ -70,7 +71,8 @@ namespace beehive.core
             return new Dictionary<string, IResultProcessor>
             {
                 {"RawIrcResultProcessor", new RawIrcResultProcessor(write)},
-                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(write)}
+                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(write)},
+                {"WCFWebResultsProcessor", new WCFWebResultsProcessor(disk)}
             };
         }
         private List<ICommand> GetCommands()
@@ -79,7 +81,8 @@ namespace beehive.core
             {
                 new Join(nick, channel, users),
                 new Part(users),
-                new Mode(users)
+                new Mode(users),
+                new Ping()
             };
         }
 

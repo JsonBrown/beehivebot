@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\ICommand.cs" />
+    <Compile Include="Contracts\IDisk.cs" />
     <Compile Include="Contracts\IResultProcessor.cs" />
     <Compile Include="Enums\Priority.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />

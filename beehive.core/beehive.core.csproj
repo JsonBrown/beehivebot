@@ -52,6 +52,7 @@
     <Compile Include="Commands\Mode.cs" />
     <Compile Include="Commands\Part.cs" />
     <Compile Include="Commands\Ping.cs" />
+    <Compile Include="External\LocalDisk.cs" />
     <Compile Include="Irc.cs" />
     <Compile Include="Processors\IrcMessageResultProcessor.cs" />
     <Compile Include="Processors\RawIrcResultProcessor.cs" />
@@ -64,6 +65,10 @@
     <ProjectReference Include="..\beehive.common\beehive.common.csproj">
       <Project>{82e8b817-64bb-4117-a355-0ef1a4ac1058}</Project>
       <Name>beehive.common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\beehive.extensions\beehive.extensions.csproj">
+      <Project>{b7a19f95-d77d-4919-bf52-c1c699d1a81e}</Project>
+      <Name>beehive.extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

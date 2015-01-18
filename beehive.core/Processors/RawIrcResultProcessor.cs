@@ -23,5 +23,10 @@ namespace beehive.core.Processors
             log.DebugFormat("Sending message: {0}", result.Message);
             write.WriteLine(result.Message);
         }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -40,6 +40,7 @@ namespace beehive.core.Commands
             {
                 if (!channelQueried)
                 {
+                    // doesn't work???
                     results.Add(new CommandResult(Priority.High, String.Format("WHO {0}", channel), "RawIrcResultProcessor"));
                     channelQueried = true;
                 }
