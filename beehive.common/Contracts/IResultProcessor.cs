@@ -1,5 +1,4 @@
-﻿using beehive.common.Enums;
-using beehive.common.Objects;
+﻿using beehive.common.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace beehive.common.Contracts
 {
-    public interface ICommand
+    public interface IResultProcessor
     {
-        bool Parse(string command);
-        List<CommandResult> Execute();
+        void Process(CommandResult result);
     }
 }

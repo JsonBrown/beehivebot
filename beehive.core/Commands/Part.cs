@@ -26,12 +26,12 @@ namespace beehive.core.Commands
             return !command.Contains("PRVTMSG") && (m = Regex.Match(command, ":(.*?)!(.*?) PART")).Success;
         }
 
-        public List<IRCMessage> Execute()
+        public List<CommandResult> Execute()
         {
             var leavingUser = m.Groups[1].Value;
             var mod = false;
             users.TryRemove(leavingUser, out mod);
-            return new List<IRCMessage>();
+            return new List<CommandResult>();
         }
     }
 }

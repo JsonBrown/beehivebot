@@ -15,6 +15,8 @@ using beehive.common.Contracts;
 using beehive.common.Enums;
 using beehive.core.Commands;
 using beehive.common.Extensions;
+using beehive.core.Processors;
+using beehive.common.Objects;
 
 
 namespace beehive.core
@@ -28,7 +30,9 @@ namespace beehive.core
         private StreamWriter write;
 
         private List<ICommand> commands;
-        private readonly Dictionary<Priority, ConcurrentQueue<string>> queues;
+        private Dictionary<string, IResultProcessor> processors;
+
+        private readonly Dictionary<Priority, ConcurrentQueue<CommandResult>> queues;
         private ConcurrentDictionary<string, bool> users = new ConcurrentDictionary<string, bool>();
 
         Thread listener;
@@ -52,17 +56,23 @@ namespace beehive.core
         }
 
 
-        private Dictionary<Priority, ConcurrentQueue<string>> GetQueues()
+        private Dictionary<Priority, ConcurrentQueue<CommandResult>> GetQueues()
         {
-            return new Dictionary<Priority, ConcurrentQueue<string>>
+            return new Dictionary<Priority, ConcurrentQueue<CommandResult>>
             {
-                {Priority.Low, new ConcurrentQueue<string>()},
-                {Priority.Medium, new ConcurrentQueue<string>()},
-                {Priority.High, new ConcurrentQueue<string>()},
-                {Priority.Raw, new ConcurrentQueue<string>()},
+                {Priority.Low, new ConcurrentQueue<CommandResult>()},
+                {Priority.Medium, new ConcurrentQueue<CommandResult>()},
+                {Priority.High, new ConcurrentQueue<CommandResult>()},
             };
         }
-
+        private Dictionary<string, IResultProcessor> GetProcessors()
+        {
+            return new Dictionary<string, IResultProcessor>
+            {
+                {"RawIrcResultProcessor", new RawIrcResultProcessor(write)},
+                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(write)}
+            };
+        }
         private List<ICommand> GetCommands()
         {
             return new List<ICommand>
@@ -118,7 +128,8 @@ namespace beehive.core
                 count++;
                 // Console.WriteLine("Connection failed.  Retrying in 5 seconds.");
                 Thread.Sleep(5000);
-            }            
+            }
+            this.processors = GetProcessors();
         }
 
         private void StartThreads()
@@ -163,7 +174,7 @@ namespace beehive.core
         private void parseMessage(String message)
         {
             log.Debug(message);
-            commands.ForEach(c => { if (c.Parse(message)) c.Execute().ForEach(m => sendMessage(m.Message, m.Queue)); } );
+            commands.ForEach(c => { if (c.Parse(message)) c.Execute().ForEach(m => queues[m.Queue].Enqueue(m)); } );
         }
 
         private void sendRaw(String message)
@@ -189,30 +200,22 @@ namespace beehive.core
             }
         }
 
-        private void sendMessage(String message, Priority priority)
-        {
-            queues[priority].Enqueue(message);
-        }
         private void handleMessageQueue(Object state)
         {
-            String message;
-            if (queues[Priority.Raw].TryDequeue(out message))
+            CommandResult result;
+            if (queues[Priority.High].TryDequeue(out result))
             {
-                sendRaw(message);
-            }
-            else if (queues[Priority.High].TryDequeue(out message))
-            {
-                sendRaw("PRIVMSG " + channel + " :" + message);
+                processors[result.Processor].Process(result);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
-            else if (queues[Priority.Medium].TryDequeue(out message))
+            else if (queues[Priority.Medium].TryDequeue(out result))
             {
-                sendRaw("PRIVMSG " + channel + " :" + message);
+                processors[result.Processor].Process(result);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
-            else if (queues[Priority.Low].TryDequeue(out message))
+            else if (queues[Priority.Low].TryDequeue(out result))
             {
-                sendRaw("PRIVMSG " + channel + " :" + message);
+                processors[result.Processor].Process(result);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
             else messageQueue.Change(4000, Timeout.Infinite);

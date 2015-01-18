@@ -10,7 +10,6 @@ namespace beehive.common.Enums
     {
         Low = 0 ,
         Medium = 1,
-        High = 2,
-        Raw = 3
+        High = 2
     }
 }

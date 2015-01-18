@@ -32,15 +32,15 @@ namespace beehive.core.Commands
             return !command.Contains("PRIVMSG") && (m = Regex.Match(command, ":(.*?)!(.*?) JOIN")).Success;
         }
 
-        public List<IRCMessage> Execute()
+        public List<CommandResult> Execute()
         {
-            var results = new List<IRCMessage>();
+            var results = new List<CommandResult>();
             var newUser = m.Groups[1].Value;
             if (newUser.ToLower() == me.ToLower())
             {
                 if (!channelQueried)
                 {
-                    results.Add(new IRCMessage(Priority.Raw, String.Format("/NAMES {0}", channel)));
+                    results.Add(new CommandResult(Priority.High, String.Format("WHO {0}", channel), "RawIrcResultProcessor"));
                     channelQueried = true;
                 }
             } 

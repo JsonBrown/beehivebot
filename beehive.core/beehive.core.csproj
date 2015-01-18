@@ -51,7 +51,10 @@
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\Mode.cs" />
     <Compile Include="Commands\Part.cs" />
+    <Compile Include="Commands\Ping.cs" />
     <Compile Include="Irc.cs" />
+    <Compile Include="Processors\IrcMessageResultProcessor.cs" />
+    <Compile Include="Processors\RawIrcResultProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

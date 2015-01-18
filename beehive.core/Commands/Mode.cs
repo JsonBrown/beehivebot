@@ -21,13 +21,15 @@ namespace beehive.core.Commands
         }
         public bool Parse(string command)
         {
-            return !command.Contains("PRIVMSG") && (m = Regex.Match(command, @":.*?MODE.*?\+o (.*?)$")).Success;
+            return !command.Contains("PRIVMSG") && (m = Regex.Match(command, @":.*?MODE.*?([\+-])o (.*?)$")).Success;
         }
 
-        public List<IRCMessage> Execute()
+        public List<CommandResult> Execute()
         {
-            users.TryUpdate(m.Groups[1].Value, true, false);
-            return new List<IRCMessage>();
+            var user = m.Groups[2].Value;
+            var op = m.Groups[1].Value == "+";
+            users.TryUpdate(user, op, !op);
+            return new List<CommandResult>();
         }
     }
 }

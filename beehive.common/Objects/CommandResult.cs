@@ -7,14 +7,16 @@ using System.Threading.Tasks;
 
 namespace beehive.common.Objects
 {
-    public class IRCMessage
+    public class CommandResult
     {
-        public IRCMessage(Priority queue, string message)
+        public CommandResult(Priority queue, string message, string processor)
         {
             Queue = queue;
             Message = message;
+            Processor = processor;
         }
         public Priority Queue { get; set; }
+        public string Processor { get; set; }
         public string Message { get; set; }
     }
 }

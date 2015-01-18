@@ -40,9 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\ICommand.cs" />
+    <Compile Include="Contracts\IResultProcessor.cs" />
     <Compile Include="Enums\Priority.cs" />
     <Compile Include="Extensions\CoreExtensions.cs" />
-    <Compile Include="Objects\IRCMessage.cs" />
+    <Compile Include="Objects\CommandResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
