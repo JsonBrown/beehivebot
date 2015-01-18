@@ -48,11 +48,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BeeHiveBot.cs" />
+    <Compile Include="Commands\Join.cs" />
+    <Compile Include="Commands\Mode.cs" />
+    <Compile Include="Commands\Part.cs" />
     <Compile Include="Irc.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\beehive.common\beehive.common.csproj">
+      <Project>{82e8b817-64bb-4117-a355-0ef1a4ac1058}</Project>
+      <Name>beehive.common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

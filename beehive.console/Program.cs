@@ -12,7 +12,7 @@ namespace beehive.console
     {
         static void Main(string[] args)
         {
-
+            log4net.Config.XmlConfigurator.Configure();
             using (var irc = new Irc(ConfigurationManager.AppSettings["botName"], String.Format("oauth:{0}", ConfigurationManager.AppSettings["botToken"]), ConfigurationManager.AppSettings["channel"]))
             {
                 Console.ReadLine();

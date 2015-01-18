@@ -10,49 +10,80 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Concurrent;
 using log4net;
+using System.Threading.Tasks;
+using beehive.common.Contracts;
+using beehive.common.Enums;
+using beehive.core.Commands;
+using beehive.common.Extensions;
+
 
 namespace beehive.core
 {
     public class Irc : IDisposable
     {
         private ILog log = LogManager.GetLogger(typeof(Irc));
-        private String nick, password, channel,  admin, user = "";
-        private int[] intervals = { 1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60 };
+        private String nick, password, channel,  admin;
         private TcpClient irc;
         private StreamReader read;
         private StreamWriter write;
-        private List<string> users = new List<string>();
-        private List<string> usersToLookup = new List<string>();
-        private ConcurrentQueue<string> highPriority = new ConcurrentQueue<string>();
-        private ConcurrentQueue<string> normalPriority = new ConcurrentQueue<string>();
-        private ConcurrentQueue<string> lowPriority = new ConcurrentQueue<string>();
-        private Thread listener;
-        private Thread timerThread;
-        private Thread KAthread;
+
+        private List<ICommand> commands;
+        private readonly Dictionary<Priority, ConcurrentQueue<string>> queues;
+        private ConcurrentDictionary<string, bool> users = new ConcurrentDictionary<string, bool>();
+
+        Thread listener;
+        Thread KAthread;
+
         private Timer messageQueue;
         private int attempt;
 
 
-        public Irc(String nick, String password, String channel)
+        public Irc(string nick, string password, string channel)
         {
-            setNick(nick);
-            setPassword(password);
-            setChannel(channel);
-            setAdmin(channel);
+
+            this.nick = nick.ToLower();
+            this.password = password;
+            this.channel = channel.StartsWith("#") ? channel : String.Format("#{0}", channel);
+            this.admin = !channel.StartsWith("#") ? channel : channel.Substring(1);
+            this.commands = GetCommands();
+            this.queues = GetQueues();
 
             Initialize();
         }
 
+
+        private Dictionary<Priority, ConcurrentQueue<string>> GetQueues()
+        {
+            return new Dictionary<Priority, ConcurrentQueue<string>>
+            {
+                {Priority.Low, new ConcurrentQueue<string>()},
+                {Priority.Medium, new ConcurrentQueue<string>()},
+                {Priority.High, new ConcurrentQueue<string>()},
+                {Priority.Raw, new ConcurrentQueue<string>()},
+            };
+        }
+
+        private List<ICommand> GetCommands()
+        {
+            return new List<ICommand>
+            {
+                new Join(nick, channel, users),
+                new Part(users),
+                new Mode(users)
+            };
+        }
+
         private void Initialize()
         {
+
             Connect();
+            StartThreads();
         }
 
         private void Connect()
         {
             if (irc != null)
             {
-                //Console.WriteLine("Irc connection already exists.  Closing it and opening a new one.");
                 irc.Close();
             }
 
@@ -61,7 +92,7 @@ namespace beehive.core
             int count = 1;
             while (!irc.Connected)
             {
-                Console.WriteLine("Connect attempt " + count);
+                log.DebugFormat("Connect attempt {0}", count);
                 try
                 {
                     irc.Connect("199.9.250.229", 443);
@@ -78,7 +109,7 @@ namespace beehive.core
                 }
                 catch (SocketException e)
                 {
-                    Console.WriteLine("Unable to connect. Retrying in 5 seconds");
+                    log.DebugFormat("Unable to connect. Retrying in 5 seconds");
                 }
                 catch (Exception e)
                 {
@@ -87,17 +118,13 @@ namespace beehive.core
                 count++;
                 // Console.WriteLine("Connection failed.  Retrying in 5 seconds.");
                 Thread.Sleep(5000);
-            }
-            StartThreads();
+            }            
         }
 
         private void StartThreads()
         {
             listener = new Thread(new ThreadStart(Listen));
             listener.Start();
-
-            timerThread = new Thread(new ThreadStart(doWork));
-            timerThread.Start();
 
             KAthread = new Thread(new ThreadStart(KeepAlive));
             KAthread.Start();
@@ -136,90 +163,12 @@ namespace beehive.core
         private void parseMessage(String message)
         {
             log.Debug(message);
-            print(message);
-        }
-
-        private void addUserToList(String nick)
-        {
-            lock (users)
-            {
-                if (!users.Contains(nick))
-                {
-                    users.Add(nick);
-                }
-            }
-        }
-
-        private void removeUserFromList(String nick)
-        {
-            lock (users)
-            {
-                if (users.Contains(nick))
-                {
-                    users.Remove(nick);
-                }
-            }
-        }
-
-        private void buildUserList()
-        {
-            sendRaw("WHO " + channel);
-        }
-
-        private String capName(String user)
-        {
-            return char.ToUpper(user[0]) + user.Substring(1);
-        }
-
-        private String getUser(String message)
-        {
-            String[] temp = message.Split('!');
-            user = temp[0].Substring(1);
-            return capName(user);
-        }
-
-        private void setNick(String tNick)
-        {
-            nick = tNick.ToLower();
-        }
-
-        private void setPassword(String tPassword)
-        {
-            password = tPassword;
-        }
-
-        private void setChannel(String tChannel)
-        {
-            if (tChannel.StartsWith("#"))
-            {
-                channel = tChannel;
-            }
-            else
-            {
-                channel = "#" + tChannel;
-            }
-        }
-
-        private void setAdmin(String tChannel)
-        {
-            if (tChannel.StartsWith("#"))
-            {
-                admin = tChannel.Substring(1);
-            }
-            else
-            {
-                admin = tChannel;
-            }
-        }
-
-        private void print(String message)
-        {
-            Console.WriteLine(message);
+            commands.ForEach(c => { if (c.Parse(message)) c.Execute().ForEach(m => sendMessage(m.Message, m.Queue)); } );
         }
 
         private void sendRaw(String message)
         {
-
+            log.DebugFormat("Sending message: {0}", message);
             try
             {
                 write.WriteLine(message);
@@ -238,102 +187,31 @@ namespace beehive.core
                     attempt = 0;
                 }
             }
-
         }
 
-        private void sendMessage(String message, int priority)
+        private void sendMessage(String message, Priority priority)
         {
-            if (priority == 1)
-            {
-                highPriority.Enqueue(message);
-            }
-            else if (priority == 2)
-            {
-                normalPriority.Enqueue(message);
-            }
-            else lowPriority.Enqueue(message);
+            queues[priority].Enqueue(message);
         }
-
-        private bool checkStream()
-        {
-            if (irc.Connected)
-            {
-                using (var w = new WebClient())
-                {
-                    String json_data = "";
-                    try
-                    {
-                        w.Proxy = null;
-                        json_data = w.DownloadString("https://api.twitch.tv/kraken/streams/" + channel.Substring(1));
-                        JObject stream = JObject.Parse(json_data);
-                        if (stream["stream"].HasValues)
-                        {
-                            //print("STREAM ONLINE");
-                            return true;
-                        }
-                    }
-                    catch (SocketException e)
-                    {
-                        Console.WriteLine("Unable to connect to twitch API to check stream status. Skipping.");
-                    }
-                    catch (Exception e)
-                    {
-                        log.ErrorFormat("Error Message (via checkStream()): {0}", e);
-                    }
-                }
-
-                //print("STREAM OFFLINE");
-                return false;
-            }
-            return false;
-        }
-
-        private void doWork()
-        {
-            while (true)
-            {
-                try
-                {
-                    Thread.Sleep(60000);
-                }
-                catch (SocketException e)
-                {
-                    Console.WriteLine("No response from twitch.  Skipping handout.");
-                }
-                catch (Exception e)
-                {
-                    log.ErrorFormat("Error Message (via doWork()): {0}", e);
-                }
-            }
-        }
-
-        private void addToLookups(String nick)
-        {
-            if (!usersToLookup.Contains(nick))
-            {
-                usersToLookup.Add(nick);
-            }
-        }
-
         private void handleMessageQueue(Object state)
         {
             String message;
-            //Console.WriteLine("Entering Message Queue.  Time: " + DateTime.Now);
-            if (highPriority.TryDequeue(out message))
+            if (queues[Priority.Raw].TryDequeue(out message))
             {
-                print(nick + ": " + message);
+                sendRaw(message);
+            }
+            else if (queues[Priority.High].TryDequeue(out message))
+            {
                 sendRaw("PRIVMSG " + channel + " :" + message);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
-            else if (normalPriority.TryDequeue(out message))
+            else if (queues[Priority.Medium].TryDequeue(out message))
             {
-                print(nick + ": " + message);
                 sendRaw("PRIVMSG " + channel + " :" + message);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
-            else if (lowPriority.TryDequeue(out message))
+            else if (queues[Priority.Low].TryDequeue(out message))
             {
-                print(nick + ": " + message);
                 sendRaw("PRIVMSG " + channel + " :" + message);
                 messageQueue.Change(4000, Timeout.Infinite);
             }
@@ -343,7 +221,6 @@ namespace beehive.core
         public void Dispose()
         {
             if (listener != null) listener.Abort();
-            if (timerThread != null) timerThread.Abort();
             if (KAthread != null) KAthread.Abort();
         }
     }

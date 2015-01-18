@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace beehive.common
+namespace beehive.common.Enums
 {
-    public class Class1
+    public enum Priority
     {
+        Low = 0 ,
+        Medium = 1,
+        High = 2,
+        Raw = 3
     }
 }
