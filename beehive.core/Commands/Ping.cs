@@ -16,7 +16,7 @@ namespace beehive.core.Commands
 
         public bool Parse(string command)
         {
-            return !command.Contains("PRIVMSG") && (m = Regex.Match(command, @":.*?PING.*? (.*?)$")).Success;
+            return !command.Contains("PRIVMSG") && (m = Regex.Match(command, @"PING.*? (.*?)$")).Success;
         }
 
         public List<CommandResult> Execute()
