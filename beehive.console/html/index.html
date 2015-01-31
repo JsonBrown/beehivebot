@@ -1,1 +1,15 @@
-<html><head><title>Hello</title></head><body><h1>working!</h1></body></html>
+<html>
+    <head>
+        <title>Hello</title>
+        <script>
+           var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+            this.socket = new WS('ws://127.0.0.1:8336');
+            this.socket.onmessage = function (e) {
+                console.log(e);
+            };
+        </script>
+    </head>
+    <body>
+        <h1>working!</h1>
+    </body>
+</html>

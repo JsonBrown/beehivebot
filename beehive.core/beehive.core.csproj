@@ -52,6 +52,7 @@
     <Compile Include="Commands\Mode.cs" />
     <Compile Include="Commands\Part.cs" />
     <Compile Include="Commands\Ping.cs" />
+    <Compile Include="Commands\SocketTest.cs" />
     <Compile Include="External\LocalDisk.cs" />
     <Compile Include="Irc.cs" />
     <Compile Include="Processors\IrcMessageResultProcessor.cs" />

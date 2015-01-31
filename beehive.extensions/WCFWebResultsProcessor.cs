@@ -60,6 +60,7 @@ namespace beehive.extensions
         }
         public void Process(CommandResult result)
         {
+            log.Debug(result.Message);
             allSockets.ForEach(s => s.Send(result.Message));
         }
 

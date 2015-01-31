@@ -83,7 +83,8 @@ namespace beehive.core
                 new Join(nick, channel, users),
                 new Part(users),
                 new Mode(users),
-                new Ping()
+                new Ping(),
+                new SocketTest()
             };
         }
 
@@ -111,9 +112,12 @@ namespace beehive.core
         {
             var queue = queues[QueueType.General];
             CommandResult result;
-            while (queue.TryDequeue(out result))
+            while (true)
             {
-                generalProcessors[result.Processor].Process(result);
+                if (queue.TryDequeue(out result))
+                {
+                    generalProcessors[result.Processor].Process(result);
+                }
             }
         }
         private void parseMessage(String message)
