@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace beehive.common.Enums
 {
-    public enum Priority
+    public enum QueueType
     {
-        Low = 0 ,
-        Medium = 1,
-        High = 2
+        General = 0 ,
+        IRC = 1
     }
 }

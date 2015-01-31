@@ -31,15 +31,19 @@ namespace beehive.core
         private StreamWriter write;
 
         private List<ICommand> commands;
-        private Dictionary<string, IResultProcessor> processors;
+        private Dictionary<string, IResultProcessor> ircProcessors;
+        private Dictionary<string, IResultProcessor> generalProcessors;
 
-        private readonly Dictionary<Priority, ConcurrentQueue<CommandResult>> queues;
+        private readonly Dictionary<QueueType, ConcurrentQueue<CommandResult>> queues;
+        
+
         private ConcurrentDictionary<string, bool> users = new ConcurrentDictionary<string, bool>();
 
         Thread listener;
         Thread KAthread;
+        Thread generalQueueHandler;
 
-        private Timer messageQueue;
+        private Timer ircResponseQueueHandler;
         private int attempt;
 
         private readonly IDisk disk;
@@ -51,30 +55,35 @@ namespace beehive.core
             this.channel = channel.StartsWith("#") ? channel : String.Format("#{0}", channel);
             this.admin = !channel.StartsWith("#") ? channel : channel.Substring(1);
             this.commands = GetCommands();
-            this.queues = GetQueues();
+
+            queues = GetQueues();
 
             Initialize();
         }
-
-
-        private Dictionary<Priority, ConcurrentQueue<CommandResult>> GetQueues()
+        private Dictionary<QueueType, ConcurrentQueue<CommandResult>> GetQueues()
         {
-            return new Dictionary<Priority, ConcurrentQueue<CommandResult>>
+            return new Dictionary<QueueType, ConcurrentQueue<CommandResult>>
             {
-                {Priority.Low, new ConcurrentQueue<CommandResult>()},
-                {Priority.Medium, new ConcurrentQueue<CommandResult>()},
-                {Priority.High, new ConcurrentQueue<CommandResult>()},
+                { QueueType.General, new ConcurrentQueue<CommandResult>() },
+                { QueueType.IRC, new ConcurrentQueue<CommandResult>() }
             };
         }
-        private Dictionary<string, IResultProcessor> GetProcessors()
+
+        private Tuple<Dictionary<string, IResultProcessor>,Dictionary<string, IResultProcessor>>  GetProcessors()
         {
-            return new Dictionary<string, IResultProcessor>
+            return new Tuple<Dictionary<string,IResultProcessor>,Dictionary<string,IResultProcessor>>
+            (new Dictionary<string, IResultProcessor>
             {
                 {"RawIrcResultProcessor", new RawIrcResultProcessor(write)},
-                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(write)},
+                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(write)}
+            },
+            new Dictionary<string, IResultProcessor>
+            {
+                // this will be loaded through MEF
                 {"WCFWebResultsProcessor", new WCFWebResultsProcessor(disk)}
-            };
+            });
         }
+
         private List<ICommand> GetCommands()
         {
             return new List<ICommand>
@@ -132,7 +141,10 @@ namespace beehive.core
                 // Console.WriteLine("Connection failed.  Retrying in 5 seconds.");
                 Thread.Sleep(5000);
             }
-            this.processors = GetProcessors();
+            this.generalProcessors = GetProcessors().Select((i,g) => {
+                this.ircProcessors = i;
+                return g;
+            });
         }
 
         private void StartThreads()
@@ -143,7 +155,10 @@ namespace beehive.core
             KAthread = new Thread(new ThreadStart(KeepAlive));
             KAthread.Start();
 
-            messageQueue = new Timer(handleMessageQueue, null, 0, 4000);
+            generalQueueHandler = new Thread(new ThreadStart(HandleGeneralQueue));
+            generalQueueHandler.Start();
+
+            ircResponseQueueHandler = new Timer(HandleIrcResponseCommandQueue, null, 0, 4000);
         }
 
         private void Listen()
@@ -171,6 +186,15 @@ namespace beehive.core
             {
                 Thread.Sleep(30000);
                 sendRaw("PING 1245");
+            }
+        }
+        private void HandleGeneralQueue()
+        {
+            var queue = queues[QueueType.General];
+            CommandResult result;
+            while (queue.TryDequeue(out result))
+            {
+                generalProcessors[result.Processor].Process(result);
             }
         }
 
@@ -203,31 +227,23 @@ namespace beehive.core
             }
         }
 
-        private void handleMessageQueue(Object state)
+        private void HandleIrcResponseCommandQueue(Object state)
         {
+            var queue = queues[QueueType.IRC];
             CommandResult result;
-            if (queues[Priority.High].TryDequeue(out result))
+            if (queue.TryDequeue(out result))
             {
-                processors[result.Processor].Process(result);
-                messageQueue.Change(4000, Timeout.Infinite);
+                ircProcessors[result.Processor].Process(result);
             }
-            else if (queues[Priority.Medium].TryDequeue(out result))
-            {
-                processors[result.Processor].Process(result);
-                messageQueue.Change(4000, Timeout.Infinite);
-            }
-            else if (queues[Priority.Low].TryDequeue(out result))
-            {
-                processors[result.Processor].Process(result);
-                messageQueue.Change(4000, Timeout.Infinite);
-            }
-            else messageQueue.Change(4000, Timeout.Infinite);
+            ircResponseQueueHandler.Change(4000, Timeout.Infinite);
         }
 
         public void Dispose()
         {
             if (listener != null) listener.Abort();
             if (KAthread != null) KAthread.Abort();
+            if (generalQueueHandler != null) generalQueueHandler.Abort();
+            if (ircResponseQueueHandler != null) ircResponseQueueHandler.Dispose();
         }
     }
 }

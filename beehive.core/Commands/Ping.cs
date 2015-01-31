@@ -23,7 +23,7 @@ namespace beehive.core.Commands
         {
             return new List<CommandResult>
             {
-                new CommandResult(Priority.High, String.Format("PONG {0}", m.Groups[1].Value), "RawIrcResultProcessor")
+                new CommandResult(QueueType.IRC, String.Format("PONG {0}", m.Groups[1].Value), "RawIrcResultProcessor")
             };
         }
     }
