@@ -14,13 +14,15 @@ namespace beehive.core.Processors
     {
         private ILog log = LogManager.GetLogger(typeof(IrcMessageResultProcessor));
         private readonly StreamWriter write;
-        public IrcMessageResultProcessor(StreamWriter write)
+        private readonly string channel;
+        public IrcMessageResultProcessor(string channel, StreamWriter write)
         {
+            this.channel = channel;
             this.write = write;
         }
         public void Process(CommandResult result)
         {
-            var message = String.Format("PRIVMSG {0}", result.Message);
+            var message = String.Format("PRIVMSG {0} : {1}", channel, result.Message);
             log.DebugFormat("Sending message: {0}", message);
             write.WriteLine(message);
         }

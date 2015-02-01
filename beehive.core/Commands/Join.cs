@@ -41,7 +41,7 @@ namespace beehive.core.Commands
                 if (!channelQueried)
                 {
                     // doesn't work???
-                    results.Add(new CommandResult(QueueType.IRC, String.Format("WHO #{0}", channel), "RawIrcResultProcessor"));
+                    results.Add(new CommandResult(QueueType.IRC, String.Format("WHO {0}", channel), "RawIrcResultProcessor"));
                     channelQueried = true;
                 }
             } 

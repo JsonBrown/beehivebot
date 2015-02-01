@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using beehive.data;
 
 namespace beehive.core
 {
@@ -35,11 +36,13 @@ namespace beehive.core
         private string nick, channel;
         private Irc irc;
         private readonly IDisk disk;
-        public BeeHiveBot(string nick, string password, string channel, IDisk disk)
+        private readonly IContext data;
+        public BeeHiveBot(string nick, string password, string channel, IDisk disk, IContext data)
         {
+            this.data = data;
             this.disk = disk;
             this.nick = nick;
-            this.channel = channel;
+            this.channel = String.Format("#{0}", channel);
             this.irc = new Irc(nick, password, channel);
             this.commands = GetCommands();
             this.queues = GetQueues();
@@ -67,7 +70,7 @@ namespace beehive.core
             (new Dictionary<string, IResultProcessor>
             {
                 {"RawIrcResultProcessor", new RawIrcResultProcessor(irc.Write)},
-                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(irc.Write)}
+                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(channel, irc.Write)}
             },
             new Dictionary<string, IResultProcessor>
             {
@@ -84,7 +87,7 @@ namespace beehive.core
                 new Part(users),
                 new Mode(users),
                 new Ping(),
-                new SocketTest()
+                new CustomCommand(data, users)
             };
         }
 
