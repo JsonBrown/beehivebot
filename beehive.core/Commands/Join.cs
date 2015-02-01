@@ -14,11 +14,11 @@ namespace beehive.core.Commands
     public class Join : ICommand
     {
         private ConcurrentDictionary<string, bool> users;
-        private Match m;
+        private Match m1;
+        private Match m2;
 
         private readonly string me;
         private readonly string channel;
-        private bool channelQueried;
 
         public Join(string me, string channel, ConcurrentDictionary<string, bool> users)
         {
@@ -29,27 +29,31 @@ namespace beehive.core.Commands
 
         public bool Parse(string command)
         {
-            return !command.Contains("PRIVMSG") && (m = Regex.Match(command, ":(.*?)!(.*?) JOIN")).Success;
+            return !command.Contains("PRIVMSG") &&
+                ((m1 = Regex.Match(command, ":(.*?)!(.*?) JOIN")).Success || (m2 = Regex.Match(command, "353.*?:(.*?)$")).Success);
         }
-
         public List<CommandResult> Execute()
         {
-            var results = new List<CommandResult>();
-            var newUser = m.Groups[1].Value;
-            if (newUser.ToLower() == me.ToLower())
-            {
-                if (!channelQueried)
+            return (m1.Success) ? ParseJoin() : ParseChannelQuery();
+        }
+
+        private List<CommandResult> ParseChannelQuery()
+        {
+            m2.Groups[1].Value.Split(' ').ToList()
+                .ForEach(u => 
                 {
-                    // doesn't work???
-                    results.Add(new CommandResult(QueueType.IRC, String.Format("WHO {0}", channel), "RawIrcResultProcessor"));
-                    channelQueried = true;
-                }
-            } 
-            else
-            {
-                users.TryAdd(newUser, false);
-            }
-            return results;            
+                    if (u.ToLower() != me.ToLower()) users.TryAdd(u, false);
+                });
+
+            return new List<CommandResult>();
+        }
+
+        private List<CommandResult> ParseJoin()
+        {
+            var newUser = m1.Groups[1].Value;
+            if (newUser.ToLower() != me.ToLower()) users.TryAdd(newUser, false);
+
+            return new List<CommandResult>();            
         }
 
         public void Dispose()

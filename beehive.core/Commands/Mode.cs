@@ -29,7 +29,7 @@ namespace beehive.core.Commands
             var user = m.Groups[2].Value;
             var op = m.Groups[1].Value == "+";
             
-            users.AddOrUpdate(user, op, (u,o) => o);
+            users.AddOrUpdate(user, op, (u,o) => op);
             return new List<CommandResult>();
         }
 
