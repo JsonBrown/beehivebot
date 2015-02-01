@@ -28,8 +28,14 @@ namespace beehive.core.Commands
         {
             var user = m.Groups[2].Value;
             var op = m.Groups[1].Value == "+";
-            users.TryUpdate(user, op, !op);
+            
+            users.AddOrUpdate(user, op, (u,o) => o);
             return new List<CommandResult>();
+        }
+
+        public void Dispose()
+        {
+            
         }
     }
 }

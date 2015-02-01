@@ -26,5 +26,10 @@ namespace beehive.core.Commands
                 new CommandResult(QueueType.General, command, "WCFWebResultsProcessor")
             };
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 }

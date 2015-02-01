@@ -10,8 +10,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using beehive.common.Enums;
+using beehive.common.Extensions;
+using System.Configuration;
 
-namespace beehive.core.Commands
+namespace beehive.extensions.Commands
 {
     public class CustomCommand : ICommand
     {
@@ -21,6 +23,9 @@ namespace beehive.core.Commands
         private readonly IContext data;
         private readonly Dictionary<string, db.CustomCommand> responses;
         private readonly Dictionary<string, Action<Queue<string>>> adminCommands;
+        public CustomCommand(ConcurrentDictionary<string, bool> users)
+            : this(new BeehiveContext(ConfigurationManager.ConnectionStrings["BeeHive"].ConnectionString), users) { }
+
         public CustomCommand(IContext data, ConcurrentDictionary<string, bool> users)
         {
             this.data = data;
@@ -41,7 +46,7 @@ namespace beehive.core.Commands
 
             var command = q.Dequeue().ToLower();
 
-            if (adminCommands.ContainsKey(command) && users[user.ToLower()]) adminCommands[command](q);
+            if (adminCommands.ContainsKey(command) && users.Get(user.ToLower())) adminCommands[command](q);
             else
             {
                 if (responses.ContainsKey(command))
@@ -69,15 +74,21 @@ namespace beehive.core.Commands
                     data.Save();
                     this.responses.Add(newCommand, custom);
                 }},
-                {"!deletecmd", (q) => {
+                {"!delcmd", (q) => {
                     var newCommand = q.Dequeue();
                     if (this.responses.ContainsKey(newCommand))
                     {
                         data.Delete(this.responses[newCommand]);
                         this.responses.Remove(newCommand);
+                        data.Save();
                     }
                 }}
             };
+        }
+
+        public void Dispose()
+        {
+            if (this.data != null) this.data.Dispose();
         }
     }
 }

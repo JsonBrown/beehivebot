@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace beehive.common.Contracts
 {
-    public interface ICommand
+    public interface ICommand : IDisposable
     {
         bool Parse(string command);
         List<CommandResult> Execute();

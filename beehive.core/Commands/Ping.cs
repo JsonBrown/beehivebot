@@ -26,5 +26,10 @@ namespace beehive.core.Commands
                 new CommandResult(QueueType.IRC, String.Format("PONG {0}", m.Groups[1].Value), "RawIrcResultProcessor")
             };
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 }

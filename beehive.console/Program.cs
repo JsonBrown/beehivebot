@@ -20,8 +20,7 @@ namespace beehive.console
 
             var disk = new LocalDisk(Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName);
 
-            using (var data = new BeehiveContext(ConfigurationManager.ConnectionStrings["BeeHive"].ConnectionString))
-            using (var irc = new BeeHiveBot(ConfigurationManager.AppSettings["botName"], String.Format("oauth:{0}", ConfigurationManager.AppSettings["botToken"]), ConfigurationManager.AppSettings["channel"], disk, data))
+            using (var irc = new BeeHiveBot(ConfigurationManager.AppSettings["botName"], String.Format("oauth:{0}", ConfigurationManager.AppSettings["botToken"]), ConfigurationManager.AppSettings["channel"], disk))
             {
                 Console.ReadLine();
             }

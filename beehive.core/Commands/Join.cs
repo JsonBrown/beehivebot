@@ -51,5 +51,10 @@ namespace beehive.core.Commands
             }
             return results;            
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 }

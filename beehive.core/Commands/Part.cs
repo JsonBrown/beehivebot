@@ -33,5 +33,10 @@ namespace beehive.core.Commands
             users.TryRemove(leavingUser, out mod);
             return new List<CommandResult>();
         }
+
+        public void Dispose()
+        {
+            
+        }
     }
 }

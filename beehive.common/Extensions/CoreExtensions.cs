@@ -12,7 +12,11 @@ namespace beehive.common.Extensions
         {
             return (source != null) ? selector(source.Item1, source.Item2) : default(TResult);
         }
-        public static A Get<T, A>(this Dictionary<T, A> dict, T value, A def = default(A))
+        public static void Assign<TSource1, TSource2>(this Tuple<TSource1, TSource2> source, Action<TSource1, TSource2> assignment)
+        {
+            if (source != null) assignment(source.Item1, source.Item2);
+        }
+        public static A Get<T, A>(this IDictionary<T, A> dict, T value, A def = default(A))
         {
             return dict.ContainsKey(value) ? dict[value] : def;
         }

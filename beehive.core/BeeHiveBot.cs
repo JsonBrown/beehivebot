@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using beehive.data;
+using beehive.extensions.Commands;
 
 namespace beehive.core
 {
@@ -36,21 +36,31 @@ namespace beehive.core
         private string nick, channel;
         private Irc irc;
         private readonly IDisk disk;
-        private readonly IContext data;
-        public BeeHiveBot(string nick, string password, string channel, IDisk disk, IContext data)
+        public BeeHiveBot(string nick, string password, string channel, IDisk disk)
         {
-            this.data = data;
             this.disk = disk;
             this.nick = nick;
             this.channel = String.Format("#{0}", channel);
-            this.irc = new Irc(nick, password, channel);
-            this.commands = GetCommands();
+            this.irc = new Irc(nick, password, this.channel);
             this.queues = GetQueues();
-            this.generalProcessors = GetProcessors().Select((i, g) =>
+
+            this.commands = new List<ICommand>
             {
-                this.ircProcessors = i;
-                return g;
-            });
+                new Join(nick, this.channel, users),
+                new Part(users),
+                new Mode(users),
+                new Ping()
+            };
+            // load from extensions lib
+            GetCommands().ForEach(c => commands.Add(c));
+
+            this.ircProcessors = new Dictionary<string, IResultProcessor>
+            {
+                {"RawIrcResultProcessor", new RawIrcResultProcessor(irc.Write)},
+                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(this.channel, irc.Write)}
+            };
+            // load from extensions lib
+            this.generalProcessors = GetProcessors();
 
             StartThreads();
         }
@@ -64,30 +74,19 @@ namespace beehive.core
             };
         }
 
-        private Tuple<Dictionary<string, IResultProcessor>, Dictionary<string, IResultProcessor>> GetProcessors()
+        private Dictionary<string, IResultProcessor> GetProcessors()
         {
-            return new Tuple<Dictionary<string, IResultProcessor>, Dictionary<string, IResultProcessor>>
-            (new Dictionary<string, IResultProcessor>
+            return new Dictionary<string, IResultProcessor>
             {
-                {"RawIrcResultProcessor", new RawIrcResultProcessor(irc.Write)},
-                {"IrcMessageResultProcessor", new IrcMessageResultProcessor(channel, irc.Write)}
-            },
-            new Dictionary<string, IResultProcessor>
-            {
-                // this will be loaded through MEF
                 {"WCFWebResultsProcessor", new WCFWebResultsProcessor(disk)}
-            });
+            };
         }
 
         private List<ICommand> GetCommands()
         {
             return new List<ICommand>
             {
-                new Join(nick, channel, users),
-                new Part(users),
-                new Mode(users),
-                new Ping(),
-                new CustomCommand(data, users)
+                new CustomCommand(users)
             };
         }
 
@@ -153,6 +152,7 @@ namespace beehive.core
             if (generalQueueHandler != null) generalQueueHandler.Abort();
             if (ircResponseQueueHandler != null) ircResponseQueueHandler.Dispose();
             if (irc != null) irc.Dispose();
+            this.commands.ForEach(c => c.Dispose());
         }
     }
 }

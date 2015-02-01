@@ -48,7 +48,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BeeHiveBot.cs" />
-    <Compile Include="Commands\CustomCommand.cs" />
     <Compile Include="Commands\Join.cs" />
     <Compile Include="Commands\Mode.cs" />
     <Compile Include="Commands\Part.cs" />
@@ -67,10 +66,6 @@
     <ProjectReference Include="..\beehive.common\beehive.common.csproj">
       <Project>{82e8b817-64bb-4117-a355-0ef1a4ac1058}</Project>
       <Name>beehive.common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\beehive.data\beehive.data.csproj">
-      <Project>{3bc500e9-c696-4a23-b506-2ec1e9089b58}</Project>
-      <Name>beehive.data</Name>
     </ProjectReference>
     <ProjectReference Include="..\beehive.extensions\beehive.extensions.csproj">
       <Project>{b7a19f95-d77d-4919-bf52-c1c699d1a81e}</Project>

@@ -33,7 +33,7 @@ namespace beehive.core
         {
             this.nick = nick.ToLower();
             this.password = password;
-            this.channel = channel.StartsWith("#") ? channel : String.Format("#{0}", channel);
+            this.channel =  channel;
             this.admin = !channel.StartsWith("#") ? channel : channel.Substring(1);
 
             Connect();
