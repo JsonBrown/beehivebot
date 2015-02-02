@@ -1,9 +1,11 @@
 ﻿using beehive.common.Contracts;
+using beehive.common.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
@@ -16,7 +18,20 @@ namespace beehive.extensions.Notifications
 {
     public class NotificationHost : INotificationHost
     {
-        private const string INDEX_PATH = @"\html\index.html";
+        private const string HTML_PATH = @"\html\{0}";
+        private const string INDEX_FILE = @"index.html";
+
+        private static Dictionary<string, string> contentTypes = new Dictionary<string, string>
+        {
+            {".jpg", "image/jpeg"},
+            {".jpeg", "image/jpeg"},
+            {".png", "image/png"},
+            {".gif", "image/gif"},
+            {".css", "text/css"},
+            {".js", "text/javascript"},
+            {".html", "text/html"}
+        };
+
         private readonly IDisk disk;
         public NotificationHost(IDisk disk)
         {
@@ -24,12 +39,12 @@ namespace beehive.extensions.Notifications
         }
         public Stream Get(string arguments)
         {
-            UriTemplateMatch uriInfo = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+            arguments = String.IsNullOrEmpty(arguments) ? INDEX_FILE : arguments;
+            if (arguments.Contains("..") || !disk.Exists(String.Format(HTML_PATH, arguments))) throw new WebFaultException(HttpStatusCode.NotFound);
 
-            MemoryStream rawResponse = new MemoryStream();
-            TextWriter response = new StreamWriter(rawResponse, Encoding.UTF8);
-            disk.Read(INDEX_PATH).CopyTo(rawResponse);
+            UriTemplateMatch uriInfo = WebOperationContext.Current.IncomingRequest.UriTemplateMatch;
+            WebOperationContext.Current.OutgoingResponse.ContentType = contentTypes.Get(Path.GetExtension(arguments).ToLower()) ?? "text/html";
+            Stream rawResponse = disk.Read(String.Format(HTML_PATH, arguments));
             rawResponse.Position = 0;
             return rawResponse;            
         }

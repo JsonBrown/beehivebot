@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using beehive.extensions.Commands;
+using beehive.extensions.Processors;
 
 namespace beehive.core
 {
@@ -137,9 +138,7 @@ namespace beehive.core
                 }
             }
             catch (IOException e)
-            {
-
-            }
+            {}
             catch (Exception e)
             {
                 log.ErrorFormat("Error Message (via Listen()): {0}", e);
@@ -153,6 +152,8 @@ namespace beehive.core
             if (ircResponseQueueHandler != null) ircResponseQueueHandler.Dispose();
             if (irc != null) irc.Dispose();
             this.commands.ForEach(c => c.Dispose());
+            this.generalProcessors.Values.ToList().ForEach(p => p.Dispose());
+            this.ircProcessors.Values.ToList().ForEach(p => p.Dispose());
         }
     }
 }

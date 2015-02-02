@@ -12,7 +12,7 @@ using System.ServiceModel.Web;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace beehive.extensions
+namespace beehive.extensions.Processors
 {
     public class WCFWebResultsProcessor : IResultProcessor
     {
