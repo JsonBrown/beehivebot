@@ -87,7 +87,8 @@ namespace beehive.core
         {
             return new List<ICommand>
             {
-                new CustomCommand(users)
+                new CustomCommand(users),
+                new Buzz(users)
             };
         }
 

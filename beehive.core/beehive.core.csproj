@@ -33,10 +33,6 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -52,7 +48,6 @@
     <Compile Include="Commands\Mode.cs" />
     <Compile Include="Commands\Part.cs" />
     <Compile Include="Commands\Ping.cs" />
-    <Compile Include="Commands\SocketTest.cs" />
     <Compile Include="External\LocalDisk.cs" />
     <Compile Include="Irc.cs" />
     <Compile Include="Processors\IrcMessageResultProcessor.cs" />

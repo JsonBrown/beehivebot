@@ -26,7 +26,6 @@ namespace beehive.core.Processors
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }

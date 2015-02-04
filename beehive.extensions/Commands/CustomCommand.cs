@@ -35,7 +35,7 @@ namespace beehive.extensions.Commands
         }
         public bool Parse(string command)
         {
-            return command.Contains("PRIVMSG") && (m = Regex.Match(command, ":(.*?)!.*?PRIVMSG.*?:(!.*?)$")).Success;
+            return command.Contains("PRIVMSG") && (m = Regex.Match(command, @":(.*?)!.*?PRIVMSG.*?:\s*(!.*?)$")).Success;
         }
 
         public List<CommandResult> Execute()

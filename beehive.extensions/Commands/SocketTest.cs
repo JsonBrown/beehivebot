@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace beehive.core.Commands
+namespace beehive.extensions.Commands
 {
     public class SocketTest : ICommand
     {
