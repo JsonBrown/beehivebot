@@ -35,8 +35,6 @@ namespace beehive.extensions.Commands
         }
 
         public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        { }
     }
 }
