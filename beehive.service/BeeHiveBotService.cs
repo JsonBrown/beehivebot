@@ -1,5 +1,6 @@
 ﻿using beehive.core;
 using beehive.core.External;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +20,7 @@ namespace beehive.service
     public partial class BeeHiveBotService : ServiceBase
     {
         private BeeHiveBot bot;
-        private CancellationTokenSource cancel;
+        private ILog log = LogManager.GetLogger(typeof(BeeHiveBotService));
         public BeeHiveBotService()
         {
             InitializeComponent();
@@ -29,11 +30,21 @@ namespace beehive.service
 
         protected override void OnStart(string[] args)
         {
-            bot.Start();
+            base.OnStart(args);
+            try
+            {
+                bot.Start(false);
+            } catch (Exception e)
+            {
+                log.Error(e);
+                throw;
+            }
+            
         }
 
         protected override void OnStop()
         {
+            base.OnStop();
             bot.Stop();
             bot.Dispose();
         }

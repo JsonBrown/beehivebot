@@ -27,13 +27,13 @@ namespace beehive.core
         private Dictionary<string, IResultProcessor> ircProcessors;
         private Dictionary<string, IResultProcessor> generalProcessors;
 
-        private readonly Dictionary<QueueType, ConcurrentQueue<CommandResult>> queues;
+        private Dictionary<QueueType, ConcurrentQueue<CommandResult>> queues;
         private ConcurrentDictionary<string, bool> users = new ConcurrentDictionary<string, bool>();
 
         private CancellationTokenSource cancel;
         private List<Task> handlers;
 
-        private string nick, channel;
+        private string nick, channel, password;
         private Irc irc;
         private readonly IDisk disk;
         public BeeHiveBot(string nick, string password, string channel, IDisk disk)
@@ -41,6 +41,11 @@ namespace beehive.core
             this.disk = disk;
             this.nick = nick;
             this.channel = String.Format("#{0}", channel);
+            this.password = password;
+        }
+
+        public void Start()
+        {
             this.irc = new Irc(nick, password, this.channel);
             this.queues = GetQueues();
 
@@ -61,10 +66,6 @@ namespace beehive.core
             };
             // load from extensions lib
             this.generalProcessors = GetProcessors();
-        }
-
-        public void Start()
-        {
             StartThreads();
         }
         public void Stop()
@@ -118,7 +119,14 @@ namespace beehive.core
             {
                 if (queue.TryDequeue(out result))
                 {
-                    ircProcessors[result.Processor].Process(result);
+                    try
+                    {
+                        ircProcessors[result.Processor].Process(result);
+                    } catch(Exception e)
+                    {
+                        log.Error(e);
+                        throw;
+                    }
                     Thread.Sleep(4000);
                 }
                 Thread.Sleep(500);
@@ -131,14 +139,22 @@ namespace beehive.core
             CommandResult result;
             while (true)
             {
-                while(queue.TryDequeue(out result))
+                try
                 {
-                    generalProcessors[result.Processor].Process(result);
+                    while(queue.TryDequeue(out result))
+                    {
+                        generalProcessors[result.Processor].Process(result);
+                    }
+                } catch(Exception e)
+                {
+                    log.Error(e);
+                    throw;
                 }
                 Thread.Sleep(500);
                 ct.ThrowIfCancellationRequested();
             }
         }
+
         private void parseMessage(String message)
         {
             log.Debug(message);
@@ -154,11 +170,11 @@ namespace beehive.core
                     ct.ThrowIfCancellationRequested();
                 }
             }
-            catch (IOException e)
-            {}
+            catch (IOException e){}
             catch (Exception e)
             {
-                log.ErrorFormat("Error Message (via Listen()): {0}", e);
+                log.Error(e);
+                throw;
             }
         }
         
