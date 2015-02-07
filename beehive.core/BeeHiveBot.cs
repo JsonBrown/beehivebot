@@ -61,8 +61,15 @@ namespace beehive.core
             };
             // load from extensions lib
             this.generalProcessors = GetProcessors();
+        }
 
+        public void Start()
+        {
             StartThreads();
+        }
+        public void Stop()
+        {
+            cancel.Cancel();
         }
 
         private Dictionary<QueueType, ConcurrentQueue<CommandResult>> GetQueues()
@@ -101,7 +108,7 @@ namespace beehive.core
                 new Task(() => HandleGeneralQueue(token), token),
                 new Task(() => HandleIrcResponseCommandQueue(token), token)
             };
-            handlers.ForEach(h => h.Start());            
+            handlers.ForEach(h => h.Start());
         }
         private void HandleIrcResponseCommandQueue(CancellationToken ct)
         {

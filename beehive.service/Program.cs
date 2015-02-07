@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceProcess;
@@ -14,12 +15,21 @@ namespace beehive.service
         /// </summary>
         static void Main()
         {
+            log4net.Config.XmlConfigurator.Configure();
+            var log = LogManager.GetLogger(typeof(Program));
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[] 
             { 
                 new BeeHiveBotService() 
             };
-            ServiceBase.Run(ServicesToRun);
+            try
+            {
+                ServiceBase.Run(ServicesToRun);
+            } catch (Exception e)
+            {
+                log.Error(e);
+            }
+            
         }
     }
 }

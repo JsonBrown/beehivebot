@@ -27,9 +27,6 @@ namespace beehive.core.Commands
             };
         }
 
-        public void Dispose()
-        {
-            
-        }
+        public void Dispose() { }
     }
 }

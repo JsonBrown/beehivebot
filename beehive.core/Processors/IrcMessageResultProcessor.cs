@@ -27,9 +27,6 @@ namespace beehive.core.Processors
             write.WriteLine(message);
         }
 
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        public void Dispose() {}
     }
 }

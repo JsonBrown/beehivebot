@@ -22,7 +22,9 @@ namespace beehive.console
 
             using (var irc = new BeeHiveBot(ConfigurationManager.AppSettings["botName"], String.Format("oauth:{0}", ConfigurationManager.AppSettings["botToken"]), ConfigurationManager.AppSettings["channel"], disk))
             {
+                irc.Start();
                 Console.ReadLine();
+                irc.Stop();
             }
             
         }

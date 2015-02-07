@@ -33,9 +33,6 @@ namespace beehive.core.Commands
             return new List<CommandResult>();
         }
 
-        public void Dispose()
-        {
-            
-        }
+        public void Dispose() { }
     }
 }

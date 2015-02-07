@@ -24,8 +24,6 @@ namespace beehive.core.Processors
             write.WriteLine(result.Message);
         }
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() { }
     }
 }

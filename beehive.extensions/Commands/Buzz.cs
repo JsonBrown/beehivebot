@@ -34,7 +34,6 @@ namespace beehive.extensions.Commands
             };
         }
 
-        public void Dispose()
-        { }
+        public void Dispose() { }
     }
 }
