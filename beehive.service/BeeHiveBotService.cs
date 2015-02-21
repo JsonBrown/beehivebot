@@ -33,7 +33,7 @@ namespace beehive.service
             base.OnStart(args);
             try
             {
-                bot.Start(false);
+                bot.Start();
             } catch (Exception e)
             {
                 log.Error(e);
