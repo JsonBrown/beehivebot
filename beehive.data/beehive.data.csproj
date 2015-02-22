@@ -60,6 +60,7 @@
     <Compile Include="BeehiveContext.cs" />
     <Compile Include="IContext.cs" />
     <Compile Include="model\CustomCommand.cs" />
+    <Compile Include="model\Quotes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

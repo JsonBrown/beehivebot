@@ -95,7 +95,8 @@ namespace beehive.core
             return new List<ICommand>
             {
                 new CustomCommand(users),
-                new Buzz(users)
+                new Buzz(users),
+                new QuoteCommand(users)
             };
         }
 

@@ -18,6 +18,7 @@ namespace beehive.data
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CustomCommand>();
+            modelBuilder.Entity<Quote>();
         }
     }
 }
