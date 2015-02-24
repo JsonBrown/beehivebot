@@ -57,7 +57,7 @@ namespace beehive.extensions.Commands
                     Quote quote = this.quotes.Where(qu => qu.Id == id).FirstOrDefault();
                     if (quote != null)
                     {
-                        results.Add(new CommandResult(QueueType.IRC, quote.Text, "IrcMessageResultProcessor"));
+                        results.Add(new CommandResult(QueueType.IRC, quote.Text, "IrcMessageResultProcessor", user));
                     } 
                 }
             }

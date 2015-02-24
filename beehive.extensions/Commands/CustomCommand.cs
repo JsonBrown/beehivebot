@@ -51,7 +51,7 @@ namespace beehive.extensions.Commands
             {
                 if (responses.ContainsKey(command))
                 {
-                    results.Add(new CommandResult(QueueType.IRC, responses[command].Response, "IrcMessageResultProcessor"));
+                    results.Add(new CommandResult(QueueType.IRC, responses[command].Response, "IrcMessageResultProcessor", user));
                 }
             }
             return results;

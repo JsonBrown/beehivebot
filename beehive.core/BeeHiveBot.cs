@@ -115,22 +115,32 @@ namespace beehive.core
         private void HandleIrcResponseCommandQueue(CancellationToken ct)
         {
             var queue = queues[QueueType.IRC];
-            CommandResult result;
+            List<CommandResult> results = new List<CommandResult>();
             while (true)
             {
-                if (queue.TryDequeue(out result))
+                CommandResult result;
+                while (queue.TryDequeue(out result))
                 {
-                    try
-                    {
-                        ircProcessors[result.Processor].Process(result);
-                    } catch(Exception e)
-                    {
-                        log.Error(e);
-                        throw;
-                    }
-                    Thread.Sleep(4000);
+                    results.Add(result);
                 }
-                Thread.Sleep(500);
+                if(results.Any())
+                {
+                    results.Combine()
+                        .ForEach(r =>
+                        {
+                            try
+                            {
+                                ircProcessors[r.Processor].Process(result);
+                            }
+                            catch (Exception e)
+                            {
+                                log.Error(e);
+                                throw;
+                            }
+                        });
+                    results.Clear();
+                }
+                Thread.Sleep(5000);
                 ct.ThrowIfCancellationRequested();
             }
         }
@@ -187,6 +197,20 @@ namespace beehive.core
             this.commands.ForEach(c => c.Dispose());
             this.generalProcessors.Values.ToList().ForEach(p => p.Dispose());
             this.ircProcessors.Values.ToList().ForEach(p => p.Dispose());
+        }
+    }
+    public static class BeehiveBotExtensions
+    {
+        public static List<CommandResult> Combine(this IEnumerable<CommandResult> results)
+        {
+            return results.GroupBy(r => new { Queue = r.Queue, Processor = r.Processor, Message = r.Message })
+                .Select(g => new CommandResult
+                {
+                    Processor = g.Key.Processor,
+                    Queue = g.Key.Queue,
+                    Message = String.Format("{0}{1}", g.All(r => r.User == null) ? String.Empty : String.Format("@ {0}\r\n", g.Select(c => c.User).Aggregate((p, n) => String.Format("{0},{1}", p, n))), g.Key.Message)
+                })
+                .ToList();
         }
     }
 }
