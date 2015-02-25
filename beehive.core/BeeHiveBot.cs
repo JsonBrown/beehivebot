@@ -125,19 +125,18 @@ namespace beehive.core
                 }
                 if(results.Any())
                 {
-                    results.Combine()
-                        .ForEach(r =>
+                    results.Combine().ForEach(r =>
+                    {
+                        try
                         {
-                            try
-                            {
-                                ircProcessors[r.Processor].Process(result);
-                            }
-                            catch (Exception e)
-                            {
-                                log.Error(e);
-                                throw;
-                            }
-                        });
+                            ircProcessors[r.Processor].Process(r);
+                        }
+                        catch (Exception e)
+                        {
+                            log.Error(e);
+                            throw;
+                        }
+                    });
                     results.Clear();
                 }
                 Thread.Sleep(5000);
@@ -208,7 +207,7 @@ namespace beehive.core
                 {
                     Processor = g.Key.Processor,
                     Queue = g.Key.Queue,
-                    Message = String.Format("{0}{1}", g.All(r => r.User == null) ? String.Empty : String.Format("@ {0}\r\n", g.Select(c => c.User).Aggregate((p, n) => String.Format("{0},{1}", p, n))), g.Key.Message)
+                    Message = String.Format("{1}{0}", g.All(r => r.User == null) ? String.Empty : String.Format(" @ {0}", g.Select(c => c.User).Aggregate((p, n) => String.Format("{0} {1}", p, n))), g.Key.Message)
                 })
                 .ToList();
         }
