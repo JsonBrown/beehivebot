@@ -13,6 +13,17 @@ This will add a command to the bot. When any user in the channel submits the *[c
 (ops only)
 this will remove a *[command]* added by !addcmd
 
+### !addquote *[quote]*
+(ops only)
+This will add a quote to the bot. quotes can be retrieved by !quote command
+
+### !delquote *[quote number]*
+(ops only)
+This will remove a quote added by !addquote
+
+### !quote *[quote number (optional)]*
+This will retrieve a quote from the DB. If a number is specified, that quote will be retrieved, otherwise a random quote will be shown.
+
 ### !buzz
 This will send a Buzz to the internal website hosted in Beehive Bot (http://localhost:8335) for use with window capture, or CLR browser source plugin
 
