@@ -114,33 +114,30 @@ namespace beehive.core
         }
         private void HandleIrcResponseCommandQueue(CancellationToken ct)
         {
-            var queue = queues[QueueType.IRC];
-            List<CommandResult> results = new List<CommandResult>();
-            while (true)
+            try
             {
-                CommandResult result;
-                while (queue.TryDequeue(out result))
+                var queue = queues[QueueType.IRC];
+                List<CommandResult> results = new List<CommandResult>();
+                while (true)
                 {
-                    results.Add(result);
-                }
-                if(results.Any())
-                {
-                    results.Combine().ForEach(r =>
+                    CommandResult result;
+                    while (queue.TryDequeue(out result))
                     {
-                        try
-                        {
-                            ircProcessors[r.Processor].Process(r);
-                        }
-                        catch (Exception e)
-                        {
-                            log.Error(e);
-                            throw;
-                        }
-                    });
-                    results.Clear();
+                        results.Add(result);
+                    }
+                    if (results.Any())
+                    {
+                        results.Combine().ForEach(r => ircProcessors[r.Processor].Process(r));
+                        results.Clear();
+                    }
+                    Thread.Sleep(5000);
+                    ct.ThrowIfCancellationRequested();
                 }
-                Thread.Sleep(5000);
-                ct.ThrowIfCancellationRequested();
+            }
+            catch (Exception e)
+            {
+                log.Error(e);
+                throw;
             }
         }
         private void HandleGeneralQueue(CancellationToken ct)
