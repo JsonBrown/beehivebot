@@ -20,5 +20,9 @@ namespace beehive.common.Extensions
         {
             return dict.ContainsKey(value) ? dict[value] : def;
         }
+        public static T Random<T>(this List<T> items)
+        {
+            return items[(new Random()).Next(0, items.Count)];
+        }
     }
 }

@@ -53,8 +53,7 @@ namespace beehive.extensions.Commands
                 if (command == "!quote")
                 {
                     var id = -1;
-                    if (!q.Any() || !int.TryParse(q.Dequeue(), out id)) id = this.quotes[(new Random()).Next(0, quotes.Count)].Id;
-                    Quote quote = this.quotes.Where(qu => qu.Id == id).FirstOrDefault();
+                    var quote = (q.Any() && int.TryParse(q.Dequeue(), out id)) ? this.quotes.FirstOrDefault(qu => qu.Id == id) : this.quotes.Random();
                     if (quote != null)
                     {
                         results.Add(new CommandResult(QueueType.IRC, String.Format("Quote #{1}: {0} ", quote.Text, quote.Id), "IrcMessageResultProcessor", user));

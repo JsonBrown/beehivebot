@@ -207,7 +207,7 @@ namespace beehive.core
                 {
                     Processor = g.Key.Processor,
                     Queue = g.Key.Queue,
-                    Message = String.Format("{1}{0}", g.All(r => r.User == null) ? String.Empty : String.Format(" @ {0}", g.Select(c => c.User).Aggregate((p, n) => String.Format("{0} {1}", p, n))), g.Key.Message)
+                    Message = String.Format("{1}{0}", g.All(r => r.User == null) ? String.Empty : String.Format(" CC: {0}", g.Select(c => c.User).Aggregate((p, n) => String.Format("{0} {1}", p, n))), g.Key.Message)
                 })
                 .ToList();
         }
