@@ -22,7 +22,7 @@ namespace beehive.common.Extensions
         }
         public static T Random<T>(this List<T> items)
         {
-            return items[(new Random()).Next(0, items.Count)];
+            return (items != null && items.Count > 0) ? items[(new Random()).Next(0, items.Count)] : default(T);
         }
     }
 }
