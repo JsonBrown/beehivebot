@@ -30,7 +30,7 @@ namespace beehive.extensions.Commands
             var user = m.Groups[1].Value;
             return new List<CommandResult>
             {
-                new CommandResult(QueueType.General, JsonConvert.SerializeObject(new { User = user, Date = DateTime.Now, Type = "buzz" }), "WCFWebResultsProcessor")
+                new CommandResult(QueueType.General, JsonConvert.SerializeObject(new { User = user, Date = DateTime.Now, CurrentUsers = users.Count, Type = "buzz" }), "WCFWebResultsProcessor")
             };
         }
 
